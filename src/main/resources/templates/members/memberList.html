@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>会員一覧</title>
+</head>
+<body>
+<h2>会員一覧 (User List)</h2>
+<table border="1">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>ログインID</th>
+        <th>お名前</th>
+        <th>メールアドレス</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="member : ${members}">
+        <td th:text="${member.id}"></td>
+        <td th:text="${member.loginId}"></td>
+        <td th:text="${member.name}"></td>
+        <td th:text="${member.email}"></td>
+        <td>
+            <a th:href="@{/members/{id}/edit (id=${member.id})}">修正</a>
+            <form th:action="@{/members/{id}/delete (id=${member.id})}" method="post" style="display:inline;">
+                <button type="submit">削除</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<br>
+<a href="/members/new">新規会員登録へ</a>
+</body>
+</html>

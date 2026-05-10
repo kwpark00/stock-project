@@ -1,0 +1,24 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>マイページ - 株式投資管理</title>
+</head>
+<body>
+<h1>株式投資管理システム</h1>
+<hr>
+<h2><span th:text="${member.name}">ユーザー</span>様、こんにちは！</h2>
+<p>本日も資産運用を頑張りましょう。</p>
+
+<div style="margin-top: 20px;">
+    <button type="button" onclick="location.href='/members'">会員一覧表示</button>
+
+    <form action="/logout" method="post" style="display:inline;">
+        <button type="submit">ログアウト</button>
+    </form>
+</div>
+
+<hr>
+<p>【お知らせ】次回のシステムメンテナンスは来週月曜日です。</p>
+</body>
+</html>

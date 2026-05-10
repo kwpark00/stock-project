@@ -1,0 +1,18 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>株式投資管理サイト</title>
+</head>
+<body>
+<h1>株式投資管理システムへようこそ</h1>
+<hr>
+<div th:if="${member == null}">
+    <p>サービスを利用するにはログインが必要です。</p>
+    <a href="/login">ログイン</a> |
+    <a href="/members/new">新規会員登録</a>
+</div>
+<br>
+
+</body>
+</html>

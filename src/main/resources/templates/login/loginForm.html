@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>ログイン</title>
+</head>
+<body>
+<h2>ログイン (Login)</h2>
+<form action="/login" method="post">
+    <div>
+        <label>ログインID:</label>
+        <input type="text" name="loginId">
+    </div>
+    <div>
+        <label>パスワード:</label>
+        <input type="password" name="password">
+    </div>
+    <button type="submit">ログイン</button>
+</form>
+<br>
+<a href="/members/new">新規会員登録</a>
+</body>
+</html>

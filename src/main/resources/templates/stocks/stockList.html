@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>銘柄一覧 - 株式投資管理</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; }
+        .container { width: 80%; margin: 0 auto; padding-top: 50px; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; border-left: 5px solid #333; padding-left: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border-bottom: 1px solid #eee; padding: 15px; text-align: left; }
+        th { background-color: #f4f4f4; color: #666; font-size: 0.9em; }
+
+        /* 상승/하락 색상 정의 */
+        .up { color: #e91e63; font-weight: bold; }   /* 상승: 일본 국룰 빨강 */
+        .down { color: #1e88e5; font-weight: bold; } /* 하락: 일본 국룰 파랑 */
+
+        .btn-group { margin-top: 30px; }
+        button { padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #555; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>📊 リアルタイム銘柄一覧</h2>
+    <p style="color: #888; font-size: 0.8em;">※ 現在値はテストデータに基づいています。</p>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Ticker</th>
+            <th>銘柄名</th>
+            <th>現在価格</th>
+            <th>前日比</th>
+            <th>騰落率</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="stock : ${stocks}">
+            <td th:text="${stock.ticker}" style="font-weight: bold; color: #555;"></td>
+            <td th:text="${stock.name}"></td>
+
+            <td th:text="${#numbers.formatInteger(stock.currentPrice, 3, 'COMMA')} + '円'"></td>
+
+            <td th:class="${stock.getChange() > 0} ? 'up' : 'down'"
+                th:text="${(stock.getChange() > 0 ? '+' : '') + #numbers.formatInteger(stock.getChange(), 1, 'COMMA')}">
+            </td>
+
+            <td th:class="${stock.getChangeRate() > 0} ? 'up' : 'down'"
+                th:text="${(stock.getChangeRate() > 0 ? '+' : '') + stock.getChangeRate() + '%'}">
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="btn-group">
+        <button type="button" onclick="location.href='/'">メイン画面へ</button>
+    </div>
+</div>
+</body>
+</html>

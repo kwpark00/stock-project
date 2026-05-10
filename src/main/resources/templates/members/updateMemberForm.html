@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>会員情報修正</title>
+</head>
+<body>
+<h2>会員情報修正 (Update Member)</h2>
+<form th:action="@{/members/{id}/edit (id=${member.id})}" method="post">
+    <div>
+        <label>ログインID:</label>
+        <input type="text" name="loginId" th:value="${member.loginId}" readonly>
+    </div>
+    <div>
+        <label>お名前:</label>
+        <input type="text" name="name" th:value="${member.name}">
+    </div>
+    <div>
+        <label>メールアドレス:</label>
+        <input type="email" name="email" th:value="${member.email}">
+    </div>
+    <button type="submit">修正完了</button>
+</form>
+<br>
+<a href="/members">キャンセル(취소)</a>
+</body>
+</html>

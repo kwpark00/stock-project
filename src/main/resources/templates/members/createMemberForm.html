@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>会員登録</title>
+</head>
+<body>
+<h2>会員登録 (User Registration)</h2>
+<form action="/members/new" method="post">
+    <div>
+        <label>ログインID:</label>
+        <input type="text" name="loginId" placeholder="IDを入力してください">
+    </div>
+    <div>
+        <label>パスワード:</label>
+        <input type="password" name="password" placeholder="PWを入力してください">
+    </div>
+    <div>
+        <label>お名前:</label>
+        <input type="text" name="name" placeholder="名前を入力してください">
+    </div>
+    <div>
+        <label>メールアドレス:</label>
+        <input type="email" name="email" placeholder="Emailを入力してください">
+    </div>
+    <button type="submit">登録する</button>
+</form>
+</body>
+</html>
