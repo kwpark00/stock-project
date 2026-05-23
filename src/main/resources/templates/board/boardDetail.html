@@ -1,0 +1,16 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>글 보기</title>
+</head>
+<body>
+<h2 th:text="${board.title}">제목</h2>
+<p>작성자: <span th:text="${board.member.name}">이름</span></p>
+<p>작성일: <span th:text="${#temporals.format(board.createdDate, 'yyyy-MM-dd HH:mm')}">시간</span></p>
+<hr>
+<p th:text="${board.content}">내용</p>
+<hr>
+<a th:href="@{/stocks/{id}/boards(id=${board.stock.id})}">목록으로</a>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>글쓰기</title>
+</head>
+<body>
+<h1>글쓰기</h1>
+<form th:action="@{/stocks/{id}/boards/new(id=${stock.id})}" method="post">
+    <div>제목: <input type="text" name="title" required></div>
+    <div>내용: <textarea name="content" required></textarea></div>
+    <button type="submit">등록</button>
+</form>
+<a th:href="@{/stocks/{id}/boards(id=${stock.id})}">취소</a>
+</body>
+</html>

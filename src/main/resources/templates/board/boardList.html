@@ -1,0 +1,31 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>掲示板 - 株式投資管理</title>
+</head>
+<body>
+<h1><span th:text="${stock.name}">종목명</span> 토론 게시판</h1>
+<a th:href="@{/stocks/{id}/boards/new(id=${stock.id})}">글쓰기</a>
+<hr>
+<table>
+    <thead>
+    <tr>
+        <th>번호</th>
+        <th>제목</th>
+        <th>작성자</th>
+        <th>작성일</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="board : ${boards}">
+        <td th:text="${board.id}">1</td>
+        <td><a th:href="@{/boards/{id}(id=${board.id})}" th:text="${board.title}">제목</a></td>
+        <td th:text="${board.member.name}">작성자</td>
+        <td th:text="${#temporals.format(board.createdDate, 'yyyy-MM-dd HH:mm')}">시간</td>
+    </tr>
+    </tbody>
+</table>
+<a href="/stocks">주식 목록으로</a>
+</body>
+</html>

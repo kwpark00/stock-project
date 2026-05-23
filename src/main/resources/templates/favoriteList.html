@@ -1,0 +1,73 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>お気に入り銘柄一覧 - 株式投資管理</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; }
+        .container { width: 80%; margin: 0 auto; padding-top: 50px; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; border-left: 5px solid #ff4081; padding-left: 15px; } /* 하트 색상인 핑크색 포인트 */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border-bottom: 1px solid #eee; padding: 15px; text-align: left; }
+        th { background-color: #f4f4f4; color: #666; font-size: 0.9em; }
+        .btn-group { margin-top: 30px; }
+        button { padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #555; }
+
+        /* 해제 버튼 스타일 */
+        .remove-btn { padding: 5px 10px; background-color: #999; color: white; border: none; border-radius: 3px; font-size: 0.85em; cursor: pointer; }
+        .remove-btn:hover { background-color: #777; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>💖 マイお気に入り銘柄</h2>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Ticker</th>
+            <th>銘柄名</th>
+            <th>現在価格</th>
+            <th>管理</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 컨트롤러에서 넘겨준 favorites 리스트를 반복 (favorite 안에 stock 객체가 들어있음) -->
+        <tr th:each="favorite : ${favorites}">
+            <td th:text="${favorite.stock.ticker}" style="font-weight: bold; color: #555;"></td>
+            <td th:text="${favorite.stock.name}"></td>
+            <td th:text="${#numbers.formatInteger(favorite.stock.currentPrice, 3, 'COMMA')} + '円'"></td>
+            <td>
+                <!-- 해제 버튼 (누르면 이전 페이지인 이 목록 화면으로 다시 똑똑하게 돌아옴) -->
+                <form th:action="@{/favorites/toggle/{id}(id=${favorite.stock.id})}" method="post" style="margin:0; padding:0;">
+                    <button type="submit" class="remove-btn">✖ 解除</button>
+                </form>
+            </td>
+        </tr>
+
+        <!-- 만약 찜한 종목이 하나도 없을 때 보여줄 안내문 -->
+        <tr th:if="${#lists.isEmpty(favorites)}">
+            <td colspan="4" style="text-align: center; color: #888; padding: 30px;">
+                お気に入りに登録された銘柄がありません。<br>
+                リアルタイム銘柄一覧から気になる銘柄を登録してみましょう！
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="btn-group">
+        <button type="button" onclick="location.href='/stocks'">銘柄一覧へ</button>
+        <button type="button" onclick="location.href='/'">メイン画面へ</button>
+    </div>
+</div>
+
+<!-- 알림창 팝업 스크립트 -->
+<script th:inline="javascript">
+    var message = /*[[${message}]]*/ null;
+    var errorMessage = /*[[${errorMessage}]]*/ null;
+    if (message) alert(message);
+    if (errorMessage) alert(errorMessage);
+</script>
+</body>
+</html>

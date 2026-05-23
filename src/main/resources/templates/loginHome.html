@@ -11,7 +11,11 @@
 <p>本日も資産運用を頑張りましょう。</p>
 
 <div style="margin-top: 20px;">
+    <!-- 새로 추가하는 관심종목 페이지 이동 버튼 -->
+    <button type="button" onclick="location.href='/favorites'">お気に入り銘柄一覧</button>
+
     <button type="button" onclick="location.href='/members'">会員一覧表示</button>
+    <button type="button" onclick="location.href='/stocks'">リアルタイム銘柄一覧</button> <!-- 혹시 주식목록 가는 버튼 없으면 같이 넣으세요 -->
 
     <form action="/logout" method="post" style="display:inline;">
         <button type="submit">ログアウト</button>
@@ -20,5 +24,7 @@
 
 <hr>
 <p>【お知らせ】次回のシステムメンテナンスは来週月曜日です。</p>
+
+
 </body>
 </html>
