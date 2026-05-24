@@ -2,65 +2,70 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
-    <title>銘柄一覧 - 株式投資管理</title>
+    <title>종목 리스트 - 주식 투자 관리</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; }
-        .container { width: 80%; margin: 0 auto; padding-top: 50px; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .container { width: 80%; margin: 0 auto; padding: 30px; background-color: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-top: 40px; }
         h2 { color: #333; border-left: 5px solid #333; padding-left: 15px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border-bottom: 1px solid #eee; padding: 15px; text-align: left; }
         th { background-color: #f4f4f4; color: #666; font-size: 0.9em; }
-
-        /* 상승/하락 색상 정의 */
-        .up { color: #e91e63; font-weight: bold; }   /* 상승: 일본 국룰 빨강 */
-        .down { color: #1e88e5; font-weight: bold; } /* 하락: 일본 국룰 파랑 */
-
-        .btn-group { margin-top: 30px; }
-        button { padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button:hover { background-color: #555; }
-
-        /* 찜하기 버튼 스타일 추가 */
+        .up { color: #e91e63; font-weight: bold; }
+        .down { color: #1e88e5; font-weight: bold; }
+        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
+        .btn { padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background-color: #555; }
+        .btn-refresh { background-color: #1e88e5; }
+        .btn-refresh:hover { background-color: #1565c0; }
         .fav-btn { padding: 5px 10px; background-color: #ff4081; color: white; border: none; border-radius: 3px; font-size: 0.85em; cursor: pointer; }
         .fav-btn:hover { background-color: #f50057; }
+        .notice { color: #888; font-size: 0.8em; margin-top: 5px; }
+        .alert { padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9em; }
+        .alert-success { background-color: #e8f5e9; color: #2e7d32; }
+        .alert-error { background-color: #ffebee; color: #c62828; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h2>📊 リアルタイム銘柄一覧</h2>
-    <p style="color: #888; font-size: 0.8em;">※ 現在値はテストデータに基づいています。</p>
+    <h2>📊 실시간 종목 리스트</h2>
+
+    <!-- 알림 메시지 (새로고침 결과) -->
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <p class="notice">※ Alpha Vantage API 기준 (무료 플랜: 분당 5회 제한)</p>
+
+    <!-- 시세 새로고침 버튼 -->
+    <form th:action="@{/stocks/refresh}" method="post" style="display:inline;">
+        <button type="submit" class="btn btn-refresh">🔄 시세 새로고침</button>
+    </form>
 
     <table>
         <thead>
         <tr>
             <th>Ticker</th>
-            <th>銘柄名</th>
-            <th>現在価格</th>
-            <th>前日比</th>
-            <th>騰落率</th>
-            <th>お気に入り</th> <!-- 1. 테이블 헤더에 '관심종목' 컬럼 추가 -->
+            <th>종목명</th>
+            <th>현재가</th>
+            <th>전일비</th>
+            <th>등락률</th>
+            <th>관심종목</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="stock : ${stocks}">
             <td th:text="${stock.ticker}" style="font-weight: bold; color: #555;"></td>
             <td th:text="${stock.name}"></td>
-
-            <td th:text="${#numbers.formatInteger(stock.currentPrice, 3, 'COMMA')} + '円'"></td>
-
+            <td th:text="${#numbers.formatInteger(stock.currentPrice, 3, 'COMMA')} + '원'"></td>
             <td th:class="${stock.getChange() > 0} ? 'up' : 'down'"
                 th:text="${(stock.getChange() > 0 ? '+' : '') + #numbers.formatInteger(stock.getChange(), 1, 'COMMA')}">
             </td>
-
             <td th:class="${stock.getChangeRate() > 0} ? 'up' : 'down'"
                 th:text="${(stock.getChangeRate() > 0 ? '+' : '') + stock.getChangeRate() + '%'}">
             </td>
-
-            <!-- 2. 각 주식마다 찜하기 버튼 양식 추가 (POST 방식으로 컨트롤러 요청) -->
             <td>
-                <form th:action="@{'/favorites/toggle/' + ${stock.id}}" method="post" style="margin:0; padding:0;">
-                    <button type="submit" class="fav-btn">♥ 登録/解除</button>
+                <form th:action="@{'/favorites/toggle/' + ${stock.id}}" method="post" style="margin:0; display:inline;">
+                    <button type="submit" class="fav-btn">♥ 등록/해제</button>
                 </form>
-
                 <a th:href="@{/stocks/{id}/boards(id=${stock.id})}"
                    style="margin-left: 10px; text-decoration: none; color: #ff6600; font-weight: bold;">
                     💬 토론방
@@ -71,23 +76,8 @@
     </table>
 
     <div class="btn-group">
-        <button type="button" onclick="location.href='/'">メイン画面へ</button>
+        <button class="btn" type="button" onclick="location.href='/'">메인화면</button>
     </div>
 </div>
-
-<!-- 3. 컨트롤러가 보낸 팝업 알림 메시지 처리 -->
-<script th:inline="javascript">
-    // 컨트롤러에서 RedirectAttributes로 보낸 메시지를 받습니다.
-    var message = /*[[${message}]]*/ null;
-    var errorMessage = /*[[${errorMessage}]]*/ null;
-
-    // 메시지가 존재하면 알림창을 띄웁니다.
-    if (message) {
-        alert(message);
-    }
-    if (errorMessage) {
-        alert(errorMessage);
-    }
-</script>
 </body>
 </html>
