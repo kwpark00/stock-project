@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -29,29 +30,51 @@ public class StockPriceUpdateService {
     private static final String API_URL =
             "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={apikey}";
 
+    // 마지막 업데이트 시각 (캐싱 용도 - 너무 자주 API 호출 방지)
+    private LocalDateTime lastUpdated = null;
+
+    // 최소 업데이트 간격: 10분
+    private static final int MIN_UPDATE_INTERVAL_MINUTES = 10;
+
+    /**
+     * 홈페이지 접속 시 호출 - 마지막 업데이트로부터 10분 지났으면 자동 갱신
+     */
+    @Transactional
+    public boolean updateIfNeeded() {
+        if (lastUpdated == null ||
+                LocalDateTime.now().isAfter(lastUpdated.plusMinutes(MIN_UPDATE_INTERVAL_MINUTES))) {
+            updateAllStockPrices();
+            return true; // 업데이트 실행됨
+        }
+        return false; // 캐시된 데이터 사용
+    }
+
     /**
      * DB에 있는 모든 종목의 현재가를 Alpha Vantage에서 가져와 업데이트
-     * (무료 플랜: 분당 5회 제한 → 종목 사이에 12초 딜레이 적용)
+     * (무료 플랜: 분당 5회 제한 → 종목 사이에 13초 딜레이)
      */
     @Transactional
     public void updateAllStockPrices() {
         List<Stock> stocks = stockRepository.findAll();
 
-        for (Stock stock : stocks) {
+        for (int i = 0; i < stocks.size(); i++) {
+            Stock stock = stocks.get(i);
             try {
                 updateStockPrice(stock);
-                // 무료 API 분당 5회 제한 대응: 종목마다 12초 대기
-                Thread.sleep(12000);
+                // 무료 API 분당 5회 제한: 첫 번째 이후 13초 대기
+                if (i < stocks.size() - 1) {
+                    Thread.sleep(13000);
+                }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 log.error("가격 업데이트 중 인터럽트 발생: {}", stock.getTicker());
             } catch (Exception e) {
-                // 한 종목 실패해도 나머지 계속 진행
                 log.error("가격 업데이트 실패 - 티커: {}, 원인: {}", stock.getTicker(), e.getMessage());
             }
         }
 
-        log.info(">>> 전체 종목 가격 업데이트 완료");
+        lastUpdated = LocalDateTime.now();
+        log.info(">>> 전체 종목 가격 업데이트 완료: {}", lastUpdated);
     }
 
     /**
@@ -74,15 +97,18 @@ public class StockPriceUpdateService {
         AlphaVantageResponse.GlobalQuote quote = response.getGlobalQuote();
 
         if (quote.getCurrentPrice() == null) {
-            log.warn("가격 정보 없음 - 티커: {} (무료 API 한도 초과 가능성 있음)", stock.getTicker());
+            log.warn("가격 정보 없음 - 티커: {} (무료 API 한도 초과 가능성)", stock.getTicker());
             return;
         }
 
-        // DB 업데이트 (JPA 변경 감지로 자동 저장)
         stock.setPrePrice(quote.getPreviousClose());
         stock.setCurrentPrice(quote.getCurrentPrice());
 
-        log.info("가격 업데이트 성공 - {}: {}원 (전일: {}원)",
+        log.info("가격 업데이트 성공 - {}: ${}  (전일: ${})",
                 stock.getTicker(), stock.getCurrentPrice(), stock.getPrePrice());
+    }
+
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
     }
 }

@@ -2,82 +2,124 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
-    <title>종목 리스트 - 주식 투자 관리</title>
+    <title>미국 주식 종목 - 주식 투자 관리</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; }
-        .container { width: 80%; margin: 0 auto; padding: 30px; background-color: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-top: 40px; }
-        h2 { color: #333; border-left: 5px solid #333; padding-left: 15px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border-bottom: 1px solid #eee; padding: 15px; text-align: left; }
-        th { background-color: #f4f4f4; color: #666; font-size: 0.9em; }
-        .up { color: #e91e63; font-weight: bold; }
-        .down { color: #1e88e5; font-weight: bold; }
-        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
-        .btn { padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .btn:hover { background-color: #555; }
-        .btn-refresh { background-color: #1e88e5; }
-        .btn-refresh:hover { background-color: #1565c0; }
-        .fav-btn { padding: 5px 10px; background-color: #ff4081; color: white; border: none; border-radius: 3px; font-size: 0.85em; cursor: pointer; }
-        .fav-btn:hover { background-color: #f50057; }
-        .notice { color: #888; font-size: 0.8em; margin-top: 5px; }
-        .alert { padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9em; }
-        .alert-success { background-color: #e8f5e9; color: #2e7d32; }
-        .alert-error { background-color: #ffebee; color: #c62828; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; }
+        .container {
+            width: 90%; max-width: 1000px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 32px;
+        }
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        h2 { color: #1a1a2e; font-size: 1.5em; }
+        .meta-info { font-size: 0.82em; color: #aaa; margin-bottom: 20px; }
+        .meta-info span { color: #555; font-weight: 600; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        th { background: #f8f9fa; color: #666; font-size: 0.82em; text-transform: uppercase; letter-spacing: 0.5px; }
+        tr:hover { background: #fafbff; }
+        .ticker { font-weight: 700; color: #1a1a2e; font-size: 0.95em; }
+        .stock-name { color: #444; }
+        .price { font-weight: 600; color: #1a1a2e; }
+        .up { color: #e53935; font-weight: 600; }
+        .down { color: #1e88e5; font-weight: 600; }
+        .neutral { color: #888; font-weight: 600; }
+
+        .btn { padding: 9px 18px; border: none; border-radius: 7px; cursor: pointer; font-size: 0.88em; font-weight: 600; }
+        .btn-back { background: #f0f2f5; color: #444; }
+        .btn-back:hover { background: #e0e2e8; }
+        .btn-refresh { background: #1a1a2e; color: white; }
+        .btn-refresh:hover { background: #2d2d4e; }
+        .fav-btn {
+            padding: 5px 11px;
+            background: #ff4081;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.82em;
+            cursor: pointer;
+        }
+        .fav-btn:hover { background: #f50057; }
+        .board-link { color: #f57c00; font-weight: 600; text-decoration: none; margin-left: 8px; font-size: 0.85em; }
+        .board-link:hover { text-decoration: underline; }
+
+        .alert { padding: 11px 15px; border-radius: 8px; margin-bottom: 16px; font-size: 0.88em; }
+        .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .alert-error   { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+        .notice { color: #aaa; font-size: 0.78em; margin-top: 4px; }
+        .btn-row { display: flex; gap: 10px; margin-top: 24px; }
+        .no-price { color: #bbb; font-style: italic; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h2>📊 실시간 종목 리스트</h2>
+    <div class="header-row">
+        <h2>📊 미국 주식 종목 현황</h2>
+    </div>
+    <div class="meta-info">
+        마지막 업데이트: <span th:text="${lastUpdated}">-</span>
+        &nbsp;|&nbsp; ※ 페이지 접속 시 자동 갱신 (10분 간격) &nbsp;·&nbsp; Alpha Vantage API (무료 플랜: 분당 5회)
+    </div>
 
-    <!-- 알림 메시지 (새로고침 결과) -->
     <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
     <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
-
-    <p class="notice">※ Alpha Vantage API 기준 (무료 플랜: 분당 5회 제한)</p>
-
-    <!-- 시세 새로고침 버튼 -->
-    <form th:action="@{/stocks/refresh}" method="post" style="display:inline;">
-        <button type="submit" class="btn btn-refresh">🔄 시세 새로고침</button>
-    </form>
 
     <table>
         <thead>
         <tr>
             <th>Ticker</th>
             <th>종목명</th>
-            <th>현재가</th>
+            <th>현재가 (USD)</th>
             <th>전일비</th>
             <th>등락률</th>
-            <th>관심종목</th>
+            <th>관심 / 토론</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="stock : ${stocks}">
-            <td th:text="${stock.ticker}" style="font-weight: bold; color: #555;"></td>
-            <td th:text="${stock.name}"></td>
-            <td th:text="${#numbers.formatInteger(stock.currentPrice, 3, 'COMMA')} + '원'"></td>
-            <td th:class="${stock.getChange() > 0} ? 'up' : 'down'"
-                th:text="${(stock.getChange() > 0 ? '+' : '') + #numbers.formatInteger(stock.getChange(), 1, 'COMMA')}">
+            <td class="ticker" th:text="${stock.ticker}"></td>
+            <td class="stock-name" th:text="${stock.name}"></td>
+            <td class="price">
+                <span th:if="${stock.currentPrice != null}"
+                      th:text="'$' + ${#numbers.formatDecimal(stock.currentPrice, 1, 'COMMA', 2, 'POINT')}">
+                </span>
+                <span th:if="${stock.currentPrice == null}" class="no-price">-</span>
             </td>
-            <td th:class="${stock.getChangeRate() > 0} ? 'up' : 'down'"
+            <td th:if="${stock.currentPrice != null}"
+                th:class="${stock.getChange() > 0 ? 'up' : (stock.getChange() < 0 ? 'down' : 'neutral')}"
+                th:text="${(stock.getChange() > 0 ? '+' : '') + stock.getChange()}">
+            </td>
+            <td th:if="${stock.currentPrice == null}" class="no-price">-</td>
+
+            <td th:if="${stock.currentPrice != null}"
+                th:class="${stock.getChangeRate() > 0 ? 'up' : (stock.getChangeRate() < 0 ? 'down' : 'neutral')}"
                 th:text="${(stock.getChangeRate() > 0 ? '+' : '') + stock.getChangeRate() + '%'}">
             </td>
+            <td th:if="${stock.currentPrice == null}" class="no-price">-</td>
+
             <td>
-                <form th:action="@{'/favorites/toggle/' + ${stock.id}}" method="post" style="margin:0; display:inline;">
-                    <button type="submit" class="fav-btn">♥ 등록/해제</button>
+                <form th:action="@{'/favorites/toggle/' + ${stock.id}}" method="post" style="display:inline;">
+                    <button type="submit" class="fav-btn">♥ 관심</button>
                 </form>
-                <a th:href="@{/stocks/{id}/boards(id=${stock.id})}"
-                   style="margin-left: 10px; text-decoration: none; color: #ff6600; font-weight: bold;">
-                    💬 토론방
-                </a>
+                <a th:href="@{/stocks/{id}/boards(id=${stock.id})}" class="board-link">💬 토론</a>
             </td>
         </tr>
         </tbody>
     </table>
 
-    <div class="btn-group">
-        <button class="btn" type="button" onclick="location.href='/'">메인화면</button>
+    <div class="btn-row">
+        <button class="btn btn-back" type="button" onclick="location.href='/'">← 메인화면</button>
+        <form th:action="@{/stocks/refresh}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-refresh">🔄 즉시 새로고침</button>
+        </form>
     </div>
+    <p class="notice">※ 즉시 새로고침은 10종목 기준 약 2분 소요됩니다 (API 제한).</p>
 </div>
 </body>
 </html>

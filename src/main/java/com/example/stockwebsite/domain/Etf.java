@@ -1,9 +1,6 @@
 package com.example.stockwebsite.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,27 +9,25 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Stock {
+public class Etf {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String ticker;
-
-    private String name;
-
+    private String ticker;      // 예: SPY
+    private String name;        // 예: SPDR S&P 500 ETF
+    private String description; // 한 줄 설명
     private Double currentPrice;
-
     private Double prePrice;
 
     public Double getChange() {
-        if (this.prePrice == null || this.currentPrice == null) return 0.0;
+        if (currentPrice == null || prePrice == null) return 0.0;
         return Math.round((currentPrice - prePrice) * 100.0) / 100.0;
     }
 
     public Double getChangeRate() {
-        if (this.prePrice == null || this.prePrice == 0.0) return 0.0;
+        if (prePrice == null || prePrice == 0.0) return 0.0;
         return Math.round((getChange() / prePrice * 100) * 100.0) / 100.0;
     }
 }

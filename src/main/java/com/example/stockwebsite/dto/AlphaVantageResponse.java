@@ -5,18 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Alpha Vantage GLOBAL_QUOTE API 응답 매핑 DTO
- * 예시 응답:
- * {
- *   "Global Quote": {
- *     "01. symbol": "AAPL",
- *     "05. price": "189.3000",
- *     "08. previous close": "188.5000",
- *     ...
- *   }
- * }
- */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -39,16 +27,14 @@ public class AlphaVantageResponse {
         @JsonProperty("08. previous close")
         private String previousClose;
 
-        // 현재가 (소수점 버리고 정수 반환)
-        public Integer getCurrentPrice() {
+        public Double getCurrentPrice() {
             if (price == null || price.isBlank()) return null;
-            return (int) Double.parseDouble(price);
+            return Math.round(Double.parseDouble(price) * 100.0) / 100.0;
         }
 
-        // 전일 종가
-        public Integer getPreviousClose() {
+        public Double getPreviousClose() {
             if (previousClose == null || previousClose.isBlank()) return null;
-            return (int) Double.parseDouble(previousClose);
+            return Math.round(Double.parseDouble(previousClose) * 100.0) / 100.0;
         }
     }
 }
