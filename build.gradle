@@ -35,6 +35,7 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
     // Yahoo Finance API
     implementation 'com.yahoofinance-api:YahooFinanceAPI:3.17.0'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 tasks.named('test') {
