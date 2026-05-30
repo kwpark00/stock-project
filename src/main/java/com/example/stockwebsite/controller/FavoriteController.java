@@ -1,7 +1,9 @@
 package com.example.stockwebsite.controller;
 
+import com.example.stockwebsite.domain.Etf;
 import com.example.stockwebsite.domain.Favorite;
 import com.example.stockwebsite.domain.Member;
+import com.example.stockwebsite.service.EtfFavoriteService;
 import com.example.stockwebsite.service.FavoriteService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -22,34 +24,32 @@ import java.util.List;
 public class FavoriteController {
 
     private final FavoriteService favoriteService;
+    private final EtfFavoriteService etfFavoriteService;
 
-    /**
-     * 1. [신규 추가] 관심종목 리스트 화면 띄우기 (GET 방식)
-     */
     @GetMapping
     public String favoriteList(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         Member loginMember = (Member) session.getAttribute("loginMember");
 
-        // 로그인 안 한 유저는 튕겨내기
         if (loginMember == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "ログインが必要です。");
             return "redirect:/login";
         }
 
-        // 서비스에서 현재 로그인한 유저의 관심종목 리스트를 가져와서 화면(Model)에 전달
+        // 기존 주식 관심종목
         List<Favorite> favorites = favoriteService.getFavoriteList(loginMember.getId());
         model.addAttribute("favorites", favorites);
 
-        return "favoriteList"; // favoriteList.html을 렌더링
+        // ETF 관심종목 추가
+        List<Etf> etfFavorites = etfFavoriteService.findMyFavorites(loginMember);
+        model.addAttribute("etfFavorites", etfFavorites);
+
+        return "favoriteList";
     }
 
-    /**
-     * 2. [기존 로직 업그레이드] 관심종목 등록/해제 처리
-     */
     @PostMapping("/toggle/{stockId}")
     public String toggleFavorite(@PathVariable("stockId") Long stockId,
                                  HttpSession session,
-                                 HttpServletRequest request, // 이전 페이지 URL을 알아내기 위해 추가
+                                 HttpServletRequest request,
                                  RedirectAttributes redirectAttributes) {
 
         Member loginMember = (Member) session.getAttribute("loginMember");
@@ -68,7 +68,6 @@ public class FavoriteController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
-        // UX 최적화: 무조건 /stocks로 가지 않고, 사용자가 클릭했던 이전 화면으로 똑똑하게 돌려보냄
         String referer = request.getHeader("Referer");
         return "redirect:" + (referer != null ? referer : "/stocks");
     }
