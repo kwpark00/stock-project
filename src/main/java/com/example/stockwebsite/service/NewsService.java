@@ -22,7 +22,12 @@ public class NewsService {
             // 파이썬 스크립트 경로 (프로젝트 루트 기준)
             String scriptPath = "scripts/news_crawler.py";
 
-            ProcessBuilder pb = new ProcessBuilder("python", scriptPath, ticker);
+            String pythonCmd = System.getProperty("os.name").toLowerCase().contains("win") ? "python" : "python3";
+            String projectRoot = System.getProperty("user.dir");
+            String fullScriptPath = projectRoot + "/scripts/news_crawler.py";
+            ProcessBuilder pb = new ProcessBuilder(pythonCmd, fullScriptPath, ticker);
+            pb.environment().put("PYTHONIOENCODING", "utf-8");  // 추가
+            pb.environment().put("PYTHONUTF8", "1");             // 추가
             pb.redirectErrorStream(true);
             Process process = pb.start();
 

@@ -23,14 +23,11 @@
         .price { font-weight: 600; }
         .up { color: #e53935; font-weight: 600; }
         .down { color: #1e88e5; font-weight: 600; }
-        .tag {
-            display: inline-block; padding: 3px 9px;
-            background: #e8f0fe; color: #1a73e8;
-            border-radius: 20px; font-size: 0.75em; font-weight: 600;
-        }
+        .rate { font-size: 0.85em; margin-left: 4px; }
         .btn-row { margin-top: 24px; display: flex; gap: 10px; }
         .btn { padding: 9px 18px; border: none; border-radius: 7px; cursor: pointer; font-size: 0.88em; font-weight: 600; }
         .btn-back { background: #f0f2f5; color: #444; }
+        .btn-back:hover { background: #e0e2e8; }
     </style>
 </head>
 <body>
@@ -48,7 +45,6 @@
             <th>ETF명 / 설명</th>
             <th>현재가 (USD)</th>
             <th>전일비</th>
-            <th>등락률</th>
         </tr>
         </thead>
         <tbody>
@@ -65,12 +61,8 @@
             </td>
             <td th:if="${etf.currentPrice != null}"
                 th:class="${etf.getChange() > 0 ? 'up' : (etf.getChange() < 0 ? 'down' : '')}">
-                <span th:text="${(etf.getChange() > 0 ? '+' : '') + etf.getChange()}"></span>
-            </td>
-            <td th:if="${etf.currentPrice == null}" style="color:#bbb;">-</td>
-            <td th:if="${etf.currentPrice != null}"
-                th:class="${etf.getChangeRate() > 0 ? 'up' : (etf.getChangeRate() < 0 ? 'down' : '')}">
-                <span th:text="${(etf.getChangeRate() > 0 ? '+' : '') + etf.getChangeRate() + '%'}"></span>
+                <span th:text="${etf.getChangeFormatted()}"></span>
+                <span class="rate" th:text="'(' + ${etf.getChangeRateFormatted()} + ')'"></span>
             </td>
             <td th:if="${etf.currentPrice == null}" style="color:#bbb;">-</td>
         </tr>
@@ -79,7 +71,6 @@
 
     <div class="btn-row">
         <button class="btn btn-back" onclick="location.href='/'">← 메인화면</button>
-        <button class="btn btn-back" onclick="location.href='/stocks'">📊 주식 목록</button>
     </div>
 </div>
 </body>

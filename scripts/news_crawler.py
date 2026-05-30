@@ -1,70 +1,45 @@
 import sys
-import requests
-from bs4 import BeautifulSoup
+import feedparser
 from datetime import datetime
 
-def fetch_yahoo_japan_news(ticker: str):
-    """
-    Yahoo Japan ファイナンスから関連ニュースをクロールする
-    出力形式: タイトル|||URL|||日付|||出典
-    """
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                      "AppleWebKit/537.36 (KHTML, like Gecko) "
-                      "Chrome/120.0.0.0 Safari/537.36",
-        "Accept-Language": "ja-JP,ja;q=0.9"
-    }
+def fetch_news(ticker: str):
+    results = []
 
-    # Google ニュース検索 (日本語)
-    query = f"{ticker} ETF"
-    url = f"https://news.google.com/search?q={query}&hl=ja&gl=JP&ceid=JP:ja"
+    # Google News RSS (일본어) - JS 렌더링 불필요, 안정적
+    feeds = [
+        f"https://news.google.com/rss/search?q={ticker}+ETF&hl=ja&gl=JP&ceid=JP:ja",
+        f"https://news.google.com/rss/search?q={ticker}&hl=ja&gl=JP&ceid=JP:ja",
+    ]
 
-    try:
-        resp = requests.get(url, headers=headers, timeout=10)
-        resp.encoding = "utf-8"
-        soup = BeautifulSoup(resp.text, "html.parser")
+    for feed_url in feeds:
+        try:
+            feed = feedparser.parse(feed_url)
+            for entry in feed.entries[:10]:
+                title  = entry.get("title", "").strip()
+                href   = entry.get("link", "").strip()
+                source = entry.get("source", {}).get("title", "Google News")
 
-        articles = soup.select("article")[:15]
-        results = []
+                # 날짜 파싱
+                published = entry.get("published_parsed")
+                if published:
+                    date_str = datetime(*published[:3]).strftime("%Y-%m-%d")
+                else:
+                    date_str = datetime.now().strftime("%Y-%m-%d")
 
-        for article in articles:
-            try:
-                title_el = article.select_one("h3 a, h4 a")
-                if not title_el:
-                    continue
-
-                title = title_el.get_text(strip=True)
-                href  = title_el.get("href", "")
-
-                # Google News의 상대경로를 절대경로로 변환
-                if href.startswith("./"):
-                    href = "https://news.google.com/" + href[2:]
-
-                # 날짜
-                time_el = article.select_one("time")
-                date_str = time_el.get("datetime", "")[:10] if time_el else datetime.now().strftime("%Y-%m-%d")
-
-                # 출처
-                source_el = article.select_one("div[data-n-tid]") or article.select_one("a[data-n-tid]")
-                source = source_el.get_text(strip=True) if source_el else "Google News"
-
-                if title:
+                if title and href:
                     results.append(f"{title}|||{href}|||{date_str}|||{source}")
 
-            except Exception:
-                continue
+            if results:
+                break  # 첫 번째 피드에서 결과 나오면 stop
 
-        for line in results:
-            print(line)
+        except Exception as e:
+            continue
 
-    except Exception as e:
-        print(f"クロールエラー: {e}|||#|||{datetime.now().strftime('%Y-%m-%d')}|||エラー", file=sys.stderr)
+    for line in results:
+        print(line)
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python news_crawler.py <TICKER>", file=sys.stderr)
         sys.exit(1)
-
-    ticker = sys.argv[1].upper()
-    fetch_yahoo_japan_news(ticker)
+    fetch_news(sys.argv[1].upper())

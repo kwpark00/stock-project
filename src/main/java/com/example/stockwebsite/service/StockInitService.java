@@ -39,7 +39,7 @@ public class StockInitService {
             {"V",     "Visa Inc."},
     };
 
-    @EventListener(ApplicationReadyEvent.class)
+    //@EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void init() {
         log.info(">>> [StockInitService] 종목 초기화 시작");

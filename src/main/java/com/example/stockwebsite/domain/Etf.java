@@ -15,9 +15,9 @@ public class Etf {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String ticker;      // 예: SPY
-    private String name;        // 예: SPDR S&P 500 ETF
-    private String description; // 한 줄 설명
+    private String ticker;
+    private String name;
+    private String description;
     private Double currentPrice;
     private Double prePrice;
 
@@ -29,5 +29,15 @@ public class Etf {
     public Double getChangeRate() {
         if (prePrice == null || prePrice == 0.0) return 0.0;
         return Math.round((getChange() / prePrice * 100) * 100.0) / 100.0;
+    }
+
+    public String getChangeFormatted() {
+        double change = getChange();
+        return (change > 0 ? "+" : "") + change;
+    }
+
+    public String getChangeRateFormatted() {
+        double rate = getChangeRate();
+        return (rate > 0 ? "+" : "") + rate + "%";
     }
 }
